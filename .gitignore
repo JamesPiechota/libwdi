@@ -46,3 +46,8 @@ ltmain.sh
 missing
 sources
 stamp-h1
+
+*.db
+*.opendb
+*.iobj
+*.ipdb

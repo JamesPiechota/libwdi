@@ -19,8 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectName>wdi-simple</ProjectName>
-    <ProjectGuid>{6DB0ADC0-12CE-44BE-968A-A3E7211783BC}</ProjectGuid>
+    <ProjectName>list-devices</ProjectName>
+    <ProjectGuid>{84C746FC-0B8B-40C5-9FB0-5EDC8377506D}</ProjectGuid>
     <RootNamespace>simple</RootNamespace>
     <Keyword>Win32Proj</Keyword>
   </PropertyGroup>
@@ -139,7 +139,8 @@
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <TargetMachine>MachineX86</TargetMachine>
-      <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
+      <UACExecutionLevel>AsInvoker</UACExecutionLevel>
+      <EnableUAC>false</EnableUAC>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -167,7 +168,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\wdi-simple.c" />
+    <ClCompile Include="..\list-devices.c" />
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="..\common_controls.manifest" />
