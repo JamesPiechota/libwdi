@@ -39,21 +39,21 @@ void usage(void)
 	printf("\n");
 	printf("-v, --vid <id>             filter list to this vendor ID (VID, use 0x prefix for hex)\n");
 	printf("-p, --pid <id>             filter list to this product ID (PID, use 0x prefix for hex)\n");
+	printf("-n, --name <name>          set the device name\n");
 	printf("-h, --help                 display usage\n");
 	printf("\n");
 }
 
 int __cdecl main(int argc, char** argv)
 {
-	static struct wdi_device_info *ldev;
+	static struct wdi_device_info *ldev, dev = { NULL, 0, 0, FALSE, 0, NULL, NULL, NULL, NULL };
 	static struct wdi_options_create_list ocl = { 0 };
-	static unsigned short vid = 0, pid = 0, mi = 0;
 	int c, r;
 
 	static struct option long_options[] = {
 		{"vid", required_argument, 0, 'v'},
 		{"pid", required_argument, 0, 'p'},
-		{"iid", required_argument, 0, 'i'},
+		{"name", required_argument, 0, 'n'},
 		{"help", no_argument, 0, 'h'},
 		{0, 0, 0, 0}
 	};
@@ -64,18 +64,18 @@ int __cdecl main(int argc, char** argv)
 
 	while(1)
 	{
-		c = getopt_long(argc, argv, "v:p:i:h", long_options, NULL);
+		c = getopt_long(argc, argv, "v:p:n:h", long_options, NULL);
 		if (c == -1)
 			break;
 		switch(c) {
 		case 'v':
-			vid = (unsigned short)strtol(optarg, NULL, 0);
+			dev.vid = (unsigned short)strtol(optarg, NULL, 0);
 			break;
 		case 'p':
-			pid = (unsigned short)strtol(optarg, NULL, 0);
+			dev.pid = (unsigned short)strtol(optarg, NULL, 0);
 			break;
-		case 'i':
-			mi = (unsigned char)strtol(optarg, NULL, 0);
+		case 'n':
+			dev.desc = optarg;
 			break;
 		case 'h':
 			usage();
@@ -93,10 +93,10 @@ int __cdecl main(int argc, char** argv)
 	if (wdi_create_list(&ldev, &ocl) == WDI_SUCCESS) {
 		r = WDI_SUCCESS;
 		for (; (ldev != NULL) && (r == WDI_SUCCESS); ldev = ldev->next) {
-			if ((0 == vid || (ldev->vid == vid)) &&
-				(0 == pid || (ldev->pid == pid)) &&
-				(0 == mi || (ldev->mi == mi))) {
-				printf("%s,%d,%d,%d,%s\n", ldev->desc, ldev->vid, ldev->pid, ldev->mi, ldev->driver);
+			if ((0 == dev.vid || (ldev->vid == dev.vid)) &&
+				(0 == dev.pid || (ldev->pid == dev.pid)) &&
+				(NULL == dev.desc || (strcmp(ldev->desc, dev.desc) == 0))) {
+				printf("%s,%d,%d,%s\n", ldev->desc, ldev->vid, ldev->pid, ldev->driver);
 			}
 		}
 	}
