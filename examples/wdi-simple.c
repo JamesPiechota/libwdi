@@ -70,6 +70,8 @@ void usage(void)
 	printf("-b, --progressbar=[HWND]   display a progress bar during install\n");
 	printf("                           an optional HWND can be specified\n");
 	printf("-o, --timeout              timeout (in millis) to wait for any pending installations\n");
+	printf("    --ignore		       ignore errors during install - helpful if the first device\n");
+	printf("                           in a list fails but you still want to flash the later devices\n");
 	printf("-l, --log                  set log level (0 = debug, 4 = none)\n");
 	printf("-h, --help                 display usage\n");
 	printf("\n");
@@ -100,6 +102,7 @@ int __cdecl main(int argc, char** argv)
 	static struct wdi_options_install_cert oic = { 0 };
 	static int opt_silent = 0, opt_extract = 0, log_level = WDI_LOG_LEVEL_WARNING;
 	static BOOL matching_device_found;
+	static BOOL ignore_errors = FALSE;
 	int c, r;
 	char *inf_name = INF_NAME;
 	char *ext_dir = DEFAULT_DIR;
@@ -123,6 +126,7 @@ int __cdecl main(int argc, char** argv)
 		{"progressbar", optional_argument, 0, 'b'},
 		{"log", required_argument, 0, 'l'},
 		{"timeout", required_argument, 0, 'o'},
+		{"ignore", no_argument, 0, 3 },
 		{"help", no_argument, 0, 'h'},
 		{0, 0, 0, 0}
 	};
@@ -143,6 +147,9 @@ int __cdecl main(int argc, char** argv)
 			break;
 		case 2: // --filter
 			oid.install_filter_driver = TRUE;
+			break;
+		case 3: // --ignore
+			ignore_errors = TRUE;
 			break;
 		case 'n':
 			dev.desc = optarg;
@@ -222,7 +229,7 @@ int __cdecl main(int argc, char** argv)
 	matching_device_found = FALSE;
 	if (wdi_create_list(&ldev, &ocl) == WDI_SUCCESS) {
 		r = WDI_SUCCESS;
-		for (; (ldev != NULL) && (r == WDI_SUCCESS); ldev = ldev->next) {
+		for (; (ldev != NULL) && (r == WDI_SUCCESS || ignore_errors); ldev = ldev->next) {
 			if ( (ldev->vid == dev.vid) && (ldev->pid == dev.pid) && (ldev->mi == dev.mi) && (strcmp(ldev->desc, dev.desc) == 0) ) {
 				dev.hardware_id = ldev->hardware_id;
 				dev.device_id = ldev->device_id;
@@ -232,6 +239,9 @@ int __cdecl main(int argc, char** argv)
 				r = wdi_install_driver(&dev, ext_dir, inf_name, &oid);
 				oprintf("%s\n", wdi_strerror(r));
 			}
+		}
+		if (ignore_errors) {
+			r = WDI_SUCCESS;
 		}
 	}
 
